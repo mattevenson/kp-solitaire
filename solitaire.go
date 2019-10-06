@@ -15,7 +15,7 @@ var black = st
 var red = st.Foreground(tcell.ColorRed)
 
 var qwerty = []rune("qw erty")
-var asdfghhj = []rune("asdfghi")
+var asdfghhj = []rune("asdfghj")
 
 var suits = [...]string{"♣", "♦", "♠", "♥"}
 var ranks = [...]string{"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}
@@ -26,6 +26,7 @@ type Tabletop struct {
 	tableau      [7][]int
 	foundations  [4][]int
 	hidden       [7]int
+	key          rune
 }
 
 func emitStr(s tcell.Screen, x, y int, style tcell.Style, str string) {
@@ -49,8 +50,23 @@ func (t *Tabletop) Deal() {
 		t.tableau[i-1] = t.stock[len(t.stock)-i:]
 		t.stock = t.stock[:len(t.stock)-i]
 	}
-	t.foundations[0] = []int{26}
-	t.foundations[2] = []int{4}
+}
+
+func (t *Tabletop) SelectKey(s tcell.Screen, key rune) {
+	switch t.key {
+	case 'q':
+		switch key {
+		case 'w':
+			if len(t.stock) > 0 {
+				t.talon = append(t.talon, t.stock[len(t.stock)-1])
+				t.stock = t.stock[:len(t.stock)-1]
+			}
+			t.key = 'z'
+		}
+	default:
+		t.key = key
+	}
+	t.Draw(s)
 }
 
 func (t Tabletop) DrawCard(s tcell.Screen, x, y int, c int) {
@@ -64,8 +80,10 @@ func (t Tabletop) DrawCard(s tcell.Screen, x, y int, c int) {
 }
 
 func (t *Tabletop) Draw(s tcell.Screen) {
+	s.Clear()
 	for i, r := range qwerty {
-		s.SetContent(i+1, 1, r, []rune("     "), black)
+		s.SetContent(6*i+1, 1, r, nil, black.Reverse(t.key == r))
+		emitStr(s, 6*i+2, 1, black, "     ")
 	}
 	if len(t.stock) > 0 {
 		t.DrawCard(s, 0, 3, t.stock[len(t.stock)-1])
@@ -80,7 +98,8 @@ func (t *Tabletop) Draw(s tcell.Screen) {
 	}
 
 	for i, r := range asdfghhj {
-		s.SetContent(i+1, 6, r, []rune("     "), black)
+		s.SetContent(6*i+1, 6, r, nil, black.Reverse(t.key == r))
+		emitStr(s, 6*i+2, 6, black, "     ")
 	}
 	for i := 0; i <= 6; i++ {
 		for j := 0; j < t.hidden[i]; j++ {
@@ -90,6 +109,7 @@ func (t *Tabletop) Draw(s tcell.Screen) {
 			t.DrawCard(s, 6*i, 8+j, t.tableau[i][j])
 		}
 	}
+	s.Sync()
 }
 
 func main() {
@@ -131,6 +151,8 @@ func main() {
 					return
 				case tcell.KeyCtrlL:
 					s.Sync()
+				case tcell.KeyRune:
+					t.SelectKey(s, ev.Rune())
 				}
 			case *tcell.EventResize:
 				s.Sync()
