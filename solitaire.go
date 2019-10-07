@@ -13,7 +13,7 @@ import (
 
 var st = tcell.StyleDefault
 var black = st
-var red = st.Foreground(tcell.ColorRed)
+var red = st.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
 
 var qwerty = []rune("qw erty")
 var asdfghhj = []rune("asdfghj")
@@ -39,6 +39,7 @@ var tableauRunes = map[rune]int{
 	'j': 6,
 }
 
+// Max Returns the max of two ints
 func Max(x, y int) int {
 	if x > y {
 		return x
@@ -46,6 +47,7 @@ func Max(x, y int) int {
 	return y
 }
 
+// EmitStr Prints a string to the screen (github.com/gdamore/tcell/blob/master/_demos/boxes.go)
 func EmitStr(s tcell.Screen, x, y int, style tcell.Style, str string) {
 	for _, c := range str {
 		var comb []rune
@@ -60,12 +62,14 @@ func EmitStr(s tcell.Screen, x, y int, style tcell.Style, str string) {
 	}
 }
 
+// CopyAndAppend Copies slice before appending to avoid weirdness (medium.com/@Jarema./golang-slice-append-gotcha-e9020ff37374)
 func CopyAndAppend(i []int, vals ...int) []int {
 	j := make([]int, len(i), len(i)+len(vals))
 	copy(j, i)
 	return append(j, vals...)
 }
 
+// Tabletop Stores the game state
 type Tabletop struct {
 	stock, talon []int
 	tableau      [7][]int
@@ -74,6 +78,7 @@ type Tabletop struct {
 	key          rune
 }
 
+// IsWon Returns true if all foundations are fully built up
 func (t *Tabletop) IsWon() bool {
 	for _, foundation := range t.foundations {
 		if len(foundation) < 13 {
@@ -83,6 +88,7 @@ func (t *Tabletop) IsWon() bool {
 	return true
 }
 
+// Deal "Shuffles" the deck of cards and forms the tableau
 func (t *Tabletop) Deal() {
 	rand.Seed(time.Now().UnixNano())
 	t.stock = rand.Perm(52)
@@ -94,6 +100,7 @@ func (t *Tabletop) Deal() {
 	t.key = 'z'
 }
 
+// CanPlayInTableau Checks if card can be played in a tableau pile
 func (t *Tabletop) CanPlayInTableau(c, i int) bool {
 	if len(t.tableau[i]) == 0 {
 		return c%13 == 12
@@ -102,6 +109,7 @@ func (t *Tabletop) CanPlayInTableau(c, i int) bool {
 	return c%13 == (c2-1)%13 && c%2 != c2%2
 }
 
+// CanPlayInFoundations Checks if card can be played in a foundation
 func (t *Tabletop) CanPlayInFoundations(c, i int) bool {
 	if len(t.foundations[i]) == 0 {
 		return c%13 == 0
@@ -110,6 +118,7 @@ func (t *Tabletop) CanPlayInFoundations(c, i int) bool {
 	return c%13 == (c2+1)%13 && c%4 == c2%4
 }
 
+// SelectKey Moves cards between piles based on user input
 func (t *Tabletop) SelectKey(s tcell.Screen, key rune) {
 	if t.key == 'z' {
 		t.key = key
@@ -127,13 +136,13 @@ func (t *Tabletop) SelectKey(s tcell.Screen, key rune) {
 			case 'e', 'r', 't', 'y':
 				i := foundationsRunes[key]
 				if t.CanPlayInFoundations(c, i) {
-					t.foundations[i] = copyAndAppend(t.foundations[i], c)
+					t.foundations[i] = CopyAndAppend(t.foundations[i], c)
 					t.stock = t.stock[:len(t.stock)-1]
 				}
 			case 'a', 's', 'd', 'f', 'g', 'h', 'j':
 				i := tableauRunes[key]
 				if t.CanPlayInTableau(c, i) {
-					t.tableau[i] = copyAndAppend(t.tableau[i], c)
+					t.tableau[i] = CopyAndAppend(t.tableau[i], c)
 					t.stock = t.stock[:len(t.stock)-1]
 				}
 			}
@@ -146,13 +155,13 @@ func (t *Tabletop) SelectKey(s tcell.Screen, key rune) {
 			case 'e', 'r', 't', 'y':
 				i := foundationsRunes[key]
 				if t.CanPlayInFoundations(c, i) {
-					t.foundations[i] = copyAndAppend(t.foundations[i], c)
+					t.foundations[i] = CopyAndAppend(t.foundations[i], c)
 					t.talon = t.talon[:len(t.talon)-1]
 				}
 			case 'a', 's', 'd', 'f', 'g', 'h', 'j':
 				i := tableauRunes[key]
 				if t.CanPlayInTableau(c, i) {
-					t.tableau[i] = copyAndAppend(t.tableau[i], c)
+					t.tableau[i] = CopyAndAppend(t.tableau[i], c)
 					t.talon = t.talon[:len(t.talon)-1]
 				}
 			}
@@ -169,13 +178,13 @@ func (t *Tabletop) SelectKey(s tcell.Screen, key rune) {
 			case 'e', 'r', 't', 'y':
 				j := foundationsRunes[key]
 				if t.CanPlayInFoundations(c, j) {
-					t.foundations[j] = copyAndAppend(t.foundations[j], c)
+					t.foundations[j] = CopyAndAppend(t.foundations[j], c)
 					t.foundations[i] = t.foundations[i][:len(t.foundations[i])-1]
 				}
 			case 'a', 's', 'd', 'f', 'g', 'h', 'j':
 				j := tableauRunes[key]
 				if t.CanPlayInTableau(c, j) {
-					t.tableau[j] = copyAndAppend(t.tableau[j], c)
+					t.tableau[j] = CopyAndAppend(t.tableau[j], c)
 					t.foundations[i] = t.foundations[i][:len(t.foundations[i])-1]
 				}
 			}
@@ -189,13 +198,13 @@ func (t *Tabletop) SelectKey(s tcell.Screen, key rune) {
 			case 'e', 'r', 't', 'y':
 				j := foundationsRunes[key]
 				if t.CanPlayInFoundations(c, j) {
-					t.foundations[j] = copyAndAppend(t.foundations[j], c)
+					t.foundations[j] = CopyAndAppend(t.foundations[j], c)
 					t.tableau[i] = t.tableau[i][:len(t.tableau[i])-1]
 				}
 			case 'a', 's', 'd', 'f', 'g', 'h', 'j':
 				j := tableauRunes[key]
 				if t.CanPlayInTableau(c, j) {
-					t.tableau[j] = copyAndAppend(t.tableau[j], c)
+					t.tableau[j] = CopyAndAppend(t.tableau[j], c)
 					t.tableau[i] = t.tableau[i][:len(t.tableau[i])-1]
 				}
 			}
@@ -208,6 +217,7 @@ func (t *Tabletop) SelectKey(s tcell.Screen, key rune) {
 	t.Draw(s)
 }
 
+// DrawCard Draw a card to the screen
 func (t Tabletop) DrawCard(s tcell.Screen, x, y int, c int) {
 	var str string
 	if c == 52 {
@@ -215,14 +225,15 @@ func (t Tabletop) DrawCard(s tcell.Screen, x, y int, c int) {
 	} else {
 		str = fmt.Sprintf("%-2s%s", ranks[c%13], suits[c%4])
 	}
-	emitStr(s, x, y, colors[c%2], str)
+	EmitStr(s, x, y, colors[c%2], str)
 }
 
+// Draw Draw the tabletop
 func (t *Tabletop) Draw(s tcell.Screen) {
 	s.Clear()
 	for i, r := range qwerty {
 		s.SetContent(6*i+1, 1, r, nil, black.Reverse(t.key == r))
-		emitStr(s, 6*i+2, 1, black, "     ")
+		EmitStr(s, 6*i+2, 1, black, "     ")
 	}
 	if len(t.stock) > 0 {
 		t.DrawCard(s, 0, 3, t.stock[len(t.stock)-1])
@@ -237,7 +248,7 @@ func (t *Tabletop) Draw(s tcell.Screen) {
 	}
 	for i, r := range asdfghhj {
 		s.SetContent(6*i+1, 6, r, nil, black.Reverse(t.key == r))
-		emitStr(s, 6*i+2, 6, black, "     ")
+		EmitStr(s, 6*i+2, 6, black, "     ")
 	}
 	for i := 0; i <= 6; i++ {
 		for j := 0; j < t.hidden[i]; j++ {
