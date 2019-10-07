@@ -4,7 +4,7 @@ A minimal Golang implementation of [Solitaire](https://bicyclecards.com/how-to-p
 
 **To run, download to your Go workspace and `go run solitaire.go`. You will need to have [Go](https://golang.org/doc/install) installed.**
 
-Cards are repersented as integers 0-51, inclusive, and modded by 13 and 4 to get their rank and suit, respectively.
+Cards are repersented as integers 0-51, inclusive, and modded by 13 and 4 to get their rank and suit, respectively. All of the piles are repersented as arrays / slices of integers, with the tableau and foundations represented as arrays of slices.
 
 [tcell](https://github.com/gdamore/tcell) is used to handle keyboard input and draw to the terminal.
 
