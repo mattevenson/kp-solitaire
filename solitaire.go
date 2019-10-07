@@ -14,6 +14,7 @@ import (
 var st = tcell.StyleDefault
 var black = st
 var red = st.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+var selected = st.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack)
 
 var qwerty = []rune("qw erty")
 var asdfghhj = []rune("asdfghj")
@@ -232,7 +233,11 @@ func (t Tabletop) DrawCard(s tcell.Screen, x, y int, c int) {
 func (t *Tabletop) Draw(s tcell.Screen) {
 	s.Clear()
 	for i, r := range qwerty {
-		s.SetContent(6*i+1, 1, r, nil, black.Reverse(t.key == r))
+		if t.key == r {
+			s.SetContent(6*i+1, 1, r, nil, selected)
+		} else {
+			s.SetContent(6*i+1, 1, r, nil, black)
+		}
 		EmitStr(s, 6*i+2, 1, black, "     ")
 	}
 	if len(t.stock) > 0 {
@@ -247,7 +252,11 @@ func (t *Tabletop) Draw(s tcell.Screen) {
 		}
 	}
 	for i, r := range asdfghhj {
-		s.SetContent(6*i+1, 6, r, nil, black.Reverse(t.key == r))
+		if t.key == r {
+			s.SetContent(6*i+1, 6, r, nil, selected)
+		} else {
+			s.SetContent(6*i+1, 6, r, nil, black)
+		}
 		EmitStr(s, 6*i+2, 6, black, "     ")
 	}
 	for i := 0; i <= 6; i++ {

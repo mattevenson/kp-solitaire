@@ -1,4 +1,4 @@
-# Design Doc
+# Solitaire
 
 A minimal Golang implementation of [Solitaire](https://bicyclecards.com/how-to-play/solitaire/) for the terminal, written as part of my application to [KP Engineering Fellows](https://fellows.kleinerperkins.com/).
 
@@ -17,4 +17,6 @@ The game uses pairs of consecutive key presses to move cards from one pile to an
 
 So, to move a card from Stock to the Talon, press **qw**.
 
-I chose Go because I had never implemented anything non-trivial in it before and I wanted to learn.
+_I chose Go because I had never implemented anything non-trivial in it before and I wanted to learn._
+
+[![asciicast](https://asciinema.org/a/n4xDFCB2WzJhUlmKcQKnZXGYc.svg)](https://asciinema.org/a/n4xDFCB2WzJhUlmKcQKnZXGYc)
