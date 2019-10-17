@@ -2,7 +2,7 @@
 
 _A minimal Golang implementation of [Solitaire](https://bicyclecards.com/how-to-play/solitaire/) for the terminal, written as part of my application to [KP Engineering Fellows](https://fellows.kleinerperkins.com/)._
 
-**To run, download to your [Go](https://golang.org/doc/install) workspace and `go run solitaire.go`.**
+**To run, download to your [Go](https://golang.org/doc/install) workspace and `go get github.com/gdamore/tcell && go run solitaire.go`.**
 
 Cards are repersented as integers 0-51, inclusive, and modded by 13 and 4 to get their rank and suit, respectively.
 

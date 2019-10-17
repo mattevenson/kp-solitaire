@@ -110,6 +110,22 @@ func (t *Tabletop) CanPlayInTableau(c, i int) bool {
 	return c%13 == (c2-1)%13 && c%2 != c2%2
 }
 
+func (t *Tabletop) BuildTableau(i, j int) {
+	if len(t.tableau[i]) == 0 {
+		return
+	}
+	for k := t.hidden[i]; k < len(t.tableau[i]); k++ {
+		if t.CanPlayInTableau(t.tableau[i][k], j) {
+			t.tableau[j] = CopyAndAppend(t.tableau[j], t.tableau[i][k:]...)
+			t.tableau[i] = t.tableau[i][:k]
+			if k == t.hidden[i] {
+				t.hidden[i]--
+			}
+			return
+		}
+	}
+}
+
 // CanPlayInFoundations Checks if card can be played in a foundation
 func (t *Tabletop) CanPlayInFoundations(c, i int) bool {
 	if len(t.foundations[i]) == 0 {
@@ -204,10 +220,7 @@ func (t *Tabletop) SelectKey(s tcell.Screen, key rune) {
 				}
 			case 'a', 's', 'd', 'f', 'g', 'h', 'j':
 				j := tableauRunes[key]
-				if t.CanPlayInTableau(c, j) {
-					t.tableau[j] = CopyAndAppend(t.tableau[j], c)
-					t.tableau[i] = t.tableau[i][:len(t.tableau[i])-1]
-				}
+				t.BuildTableau(i, j)
 			}
 			if len(t.tableau[i]) == t.hidden[i] {
 				t.hidden[i]--
