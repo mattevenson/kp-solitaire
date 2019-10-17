@@ -110,6 +110,7 @@ func (t *Tabletop) CanPlayInTableau(c, i int) bool {
 	return c%13 == (c2-1)%13 && c%2 != c2%2
 }
 
+// BuildTableau Transfers face-up cards from one tableau pile to another
 func (t *Tabletop) BuildTableau(i, j int) {
 	if len(t.tableau[i]) == 0 {
 		return
